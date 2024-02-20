@@ -144,4 +144,5 @@ REST_FRAMEWORK = {
 # Todo: Dev to be removed
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # Adjust the port if your Next.js app runs on a different one
+    "https://luboss95vb.com",
 ]

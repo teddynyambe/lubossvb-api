@@ -11,14 +11,22 @@ from account_app.models import Account
 class Declaration(models.Model):
     declaration_id = models.UUIDField(
         default=uuid.uuid4, unique=True, primary_key=True, editable=False, help_text="Globally Unique Identifier")
-    member_id = models.ForeignKey(Member, on_delete=models.CASCADE)
+    member = models.ForeignKey(
+        Member, null=True, on_delete=models.CASCADE, help_text="The member this declaration belongs to")
     declaration_date = models.DateTimeField(
         auto_now_add=True, help_text="The date and time declaration made.")
-    # saving_amount = models.DecimalField(max_digits=10, decimal_places=2, help_text="Saving amount")
-    # social_fund_amount = models.DecimalField(max_digits=10, decimal_places=2, help_text="Social fund amount")
-    # admin_fee_amount = models.DecimalField(max_digits=10, decimal_places=2, help_text="Admin fee amount")
-    # interest_amount = models.DecimalField(max_digits=10, decimal_places=2, help_text="Interest fee amount")
-    # loan_repayment_amount = models.DecimalField(max_digits=10, decimal_places=2, help_text="Loan repayment amount")
+    saving_amount = models.DecimalField(
+        max_digits=10, default=0.0, decimal_places=2, help_text="Saving amount")
+    social_fund_amount = models.DecimalField(
+        max_digits=10, decimal_places=2, help_text="Social fund amount")
+    admin_fee_amount = models.DecimalField(
+        max_digits=10, default=0.0, decimal_places=2, help_text="Admin fee amount")
+    interest_amount = models.DecimalField(
+        max_digits=10, default=0.0, decimal_places=2, help_text="Interest fee amount")
+    loan_repayment_amount = models.DecimalField(
+        max_digits=10, default=0.0, decimal_places=2, help_text="Loan repayment amount")
+    is_deleted = models.BooleanField(
+        default=False, help_text="Indicated the record is deleted")
 
 
 # Transactions categorized by account affected by the transaction

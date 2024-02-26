@@ -62,7 +62,26 @@ def login_user(request):
     if user:
         # If authentication is successful, get or create a token
         token, created = Token.objects.get_or_create(user=user)
-        return Response({'token': token.key}, status=status.HTTP_200_OK)
+
+        # Grab the role
+        # Fetch user's groups (roles)
+        groups = user.groups.all()
+        roles = [group.name for group in groups]
+
+        # Grab member related data
+        member = Member.objects.get(user=user)
+
+        member_data = {
+            'first_name': member.first_name,
+            'last_name': member.last_name,
+            'member_id': member.member_id
+        }
+
+        return Response({
+            'token': token.key,
+            'username': user.username,
+            'role': roles,
+            'member': member_data}, status=status.HTTP_200_OK)
     else:
         # If authentication fails, return an error
         return Response({'error': 'Invalid Credentials'}, status=status.HTTP_400_BAD_REQUEST)

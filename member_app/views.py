@@ -1,4 +1,5 @@
-from django.shortcuts import render
+import uuid
+from django.shortcuts import get_object_or_404, render
 
 # account_app/views.py
 from django.contrib.auth import authenticate
@@ -10,23 +11,26 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from .models import Member
 from .serializers import MemberSerializer, UserSerializer
+from django.contrib.auth.hashers import make_password
 
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def register_user(request):
-    # Extract user data from request
-    # username = request.data.get('username')
-    # password = request.data.get('password')
-    # role = request.data.get('role')
-
-    # first_name = request.data.get('first_name', '')
-    # last_name = request.data.get('last_name', '')
-    # nrc = request.data.get('nrc')
-
+    serializer = MemberSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+# def register_user(request):
     user_serializer = UserSerializer(data=request.data)
     if user_serializer.is_valid():
+        # Modify validated_data directly before saving
+        user_serializer.validated_data['is_active'] = False
         user = user_serializer.save()
+        user.is_active = False
+        user.save()
+
         role = request.data.get('role')
 
         # Assign user to group based on role
@@ -38,9 +42,12 @@ def register_user(request):
 
         # Now handle Member creation or updating
         member_data = request.data.copy()
+        member_data.pop('member_id', None)
+
         # Add the user instance to the member data
-        member_data['user'] = user.pk
+        member_data['user_id'] = user.pk
         member_serializer = MemberSerializer(data=member_data)
+
         if member_serializer.is_valid():
             member_serializer.save()
             return Response({'status': True}, status=status.HTTP_201_CREATED)
@@ -106,3 +113,45 @@ def member_list(request):
 #     """
 #     Approve member by admin
 #     """
+
+@api_view(['PUT'])
+def user_member_update(request, pk):
+    try:
+        member = Member.objects.get(pk=pk)
+    except Member.DoesNotExist:
+        return Response({'error': 'Member not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    serializer = MemberSerializer(
+        member, data=request.data, partial=True)  # Allow partial updates
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+# def user_member_update(request):
+    # if request.method == 'PUT':
+
+    #     username = request.data.get('username')
+
+    #     print(f"Username: {username}")
+
+    #     user = get_object_or_404(User, username=username)
+
+    #     if request.data.get('password') == 'no_change':
+    #         pass
+    #     else:
+    #         new_password = make_password(request.data.get('password'))
+    #         user.password = new_password
+
+    #     member = get_object_or_404(Member, user=user)
+
+    #     user_serializer = UserSerializer(user, data=request.data)
+    #     if not user_serializer.is_valid():
+    #         return Response(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    #     member_serializer = MemberSerializer(member, data=request.data)
+    #     if not member_serializer.is_valid():
+    #         return Response(member_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    #     user_serializer.save()
+    #     member_serializer.save()
+    #     return Response(member_serializer.data, status=status.HTTP_200_OK)

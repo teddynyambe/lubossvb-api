@@ -26,3 +26,9 @@ class DeclareSerializer(serializers.ModelSerializer):
         # Correctly create a Declaration instance
         declaration = Declaration.objects.create(**validated_data)
         return declaration
+
+    def update(self, instance, validated_data):
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        return instance

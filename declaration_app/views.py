@@ -9,6 +9,8 @@ from member_app.models import Member
 from .models import Declaration
 from .serializers import DeclareSerializer
 
+# Save New Declaration
+
 
 @api_view(['POST'])
 def save_declaration(request):
@@ -18,6 +20,32 @@ def save_declaration(request):
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+# Save existing declaration
+
+
+@api_view(['PUT', 'PATCH'])
+def declaration_update(request):
+    print(f"TEsign: ${request.data.get('declaration_id')}")
+    try:
+        declaration = Declaration.objects.get(
+            declaration_id=request.data.get('declaration_id'))
+    except Declaration.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'PATCH':
+        #     # For a full update
+        #     serializer = DeclareSerializer(declaration, data=request.data)
+        # elif request.method == 'PATCH':
+        # For a partial update
+        serializer = DeclareSerializer(
+            declaration, data=request.data, partial=True)
+
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    else:
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # Get member declaration

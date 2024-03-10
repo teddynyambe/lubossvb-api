@@ -2,6 +2,7 @@ from django.urls import path
 from .views import save_declaration
 from .views import get_all_declarations
 from .views import get_all_declarations_made
+from .views import declaration_update
 
 urlpatterns = [
     # Define other URL patterns for your app here
@@ -14,4 +15,9 @@ urlpatterns = [
 
     # Get all declarations by all
     path('declarations/all', get_all_declarations_made, name='all_declarations'),
+
+    # Update existing declarations
+    path('declarations/update', declaration_update, name='all_declarations'),
+
+
 ]

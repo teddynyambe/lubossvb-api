@@ -123,6 +123,9 @@ lib64
 include
 pyvenv.cfg
 
+# Application
+app_core/settings.py
+
 
 # Spyder project settings
 .spyderproject
